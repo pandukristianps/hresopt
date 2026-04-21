@@ -21,8 +21,8 @@ def run_pso(
 
     wind_bounds=(0, 1000),
     wave_bounds=(0, 1000),
-    geo_bounds=(0,17.6e3),      # in kW
-    battery_bounds=(0, 1e7),    # in Wh
+    geo_bounds=(0, 17.6e3),
+    battery_bounds=(0, 1e7),
     step_battery=100,
 
     random_seed=None,

@@ -5,11 +5,13 @@ class EconomicParams:
     # Capital Expenditures ($/kW or $/kWh)
     capex_wind_per_kW: float = 5460
     capex_wave_per_kW: float = 7000
+    capex_geo_per_kW: float = 5115
     capex_battery_per_kWh: float = 200
 
     # Operational Expenditures ($/kW/year or $/kWh/year)
     opex_wind_per_kW: float = 95
     opex_wave_per_kW: float = 150
+    opex_geo_per_kW: float = 110
     opex_battery_per_kWh: float = 10
 
     # Fixed Charge Rates
