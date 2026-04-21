@@ -35,7 +35,8 @@ def system_inputs(
 
     components = define_components(
         wind=use_wind,
-        wave=use_wave
+        wave=use_wave,
+        battery=True
     )
 
     resources, meta = load_resources(
