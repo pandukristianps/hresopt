@@ -35,7 +35,7 @@ def load_power_curve(path):
 # =========================================================
 # HEIGHT CORRECTION FOR WIND SPEED
 # =========================================================
-def extrapolate_wind_speed(wind_speed, z_hub, z_ref=100, alpha=None, params: SystemParams = None):
+def extrapolate_wind_speed(wind_speed, z_hub=100, z_ref=100, alpha=None, params: SystemParams = None):
     """
     Extrapolate wind speed to hub height using power law.
 
@@ -110,7 +110,7 @@ def power_from_curve(wind_speed, curve):
 def compute_wind_power(
     df,
     curve_path,
-    z_hub,
+    z_hub=100,
     params: SystemParams = None,
     z_ref=100,
 ):
