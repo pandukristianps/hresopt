@@ -17,4 +17,5 @@ class EconomicParams:
     # Fixed Charge Rates
     fcr_wind: float = 0.051
     fcr_wave: float = 0.108
+    fcr_geo: float = 0.063
     fcr_battery: float = 0.096
