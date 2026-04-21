@@ -21,29 +21,49 @@ def compute_costs(params: SystemParams = None):
     opex_wave = econ.opex_wave_per_kW * equip.P_rated_wave
     cost_wave = capex_wave + opex_wave
 
-    capex_battery = econ.capex_battery_per_kWh * econ.fcr_battery
-    opex_battery = econ.opex_battery_per_kWh
-    cost_battery = capex_battery + opex_battery
+    capex_geo = econ.capex_geo_per_kW * econ.fcr_geo
+    opex_geo = econ.opex_geo_per_kW 
+    cost_geo = capex_geo + opex_geo
 
-    return cost_wind, cost_wave, cost_battery
+    capex_batt = econ.capex_battery_per_kWh * econ.fcr_battery
+    opex_batt = econ.opex_battery_per_kWh
+    cost_batt = capex_batt + opex_batt
+
+    return cost_wind, cost_wave, cost_geo, cost_batt
 
 
 # =========================
 # ENERGY SYSTEM SIMULATION
 # =========================
 def simulate_energy_system(
-    wind_power,
-    wave_power,
-    energy_demand,
-    num_wind,
-    num_wave,
-    batt_cap,
+    wind_power=None,
+    wave_power=None,
+    geo_power=None,
+    energy_demand=None,
+    num_wind=0,
+    num_wave=0,
+    geo_cap=0,
+    batt_cap=0,
     params: SystemParams = None,
     init_soc=0,
 ):
     
     if params is None:
         params = SystemParams()
+
+    T = len(energy_demand)
+
+    if wind_power is None:
+        wind_power = np.zeros(T)
+
+    if wave_power is None:
+        wave_power = np.zeros(T)
+
+    if geo_power is None:
+        geo_power = np.zeros(T)
+
+    if energy_demand is None:
+        raise ValueError("energy_demand cannot be None")
 
     equip = params.equipment
 
@@ -54,11 +74,9 @@ def simulate_energy_system(
     SOC_min = equip.SOC_min
     SOC_max = equip.SOC_max
 
-    cost_wind, cost_wave, cost_battery = compute_costs(params)
+    cost_wind, cost_wave, cost_geo, cost_battery = compute_costs(params)
 
-    T = len(wind_power)
-
-    energy_generated = (wind_power * num_wind + wave_power * num_wave) * eta_generation
+    energy_generated = (wind_power * num_wind + wave_power * num_wave + geo_power) * eta_generation
 
     energy_stored = np.zeros(T + 1)
     energy_met = np.zeros(T)
@@ -95,7 +113,7 @@ def simulate_energy_system(
     # =========================
     # METRICS
     # =========================
-    total_cost = num_wind * cost_wind + num_wave * cost_wave + batt_cap * cost_battery
+    total_cost = num_wind * cost_wind + num_wave * cost_wave + geo_cap * cost_geo + batt_cap * cost_battery
     total_energy_met = np.sum(energy_met)
     total_energy_generated = np.sum(energy_generated)
 
@@ -103,7 +121,7 @@ def simulate_energy_system(
     LPSP = np.sum(energy_unmet) / np.sum(energy_demand)
     SOC_final = SOC[-1]
 
-    installed_capacity = float(num_wind * equip.P_rated_wind + num_wave * equip.P_rated_wave)
+    installed_capacity = float(num_wind * equip.P_rated_wind + num_wave * equip.P_rated_wave + geo_cap)
     capacity_ratio = total_energy_generated/(installed_capacity * T + 1e-10)
     effective_capacity_factor = total_energy_met / (installed_capacity * T + 1e-10)
 

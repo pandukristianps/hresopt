@@ -4,9 +4,10 @@ from hresopt.energy_system.energy_system import simulate_energy_system
 
 
 def run_pso(
-    wind_power,
-    wave_power,
-    energy_demand,
+    wind_power=None,
+    wave_power=None,
+    geo_power=None,
+    energy_demand=None,
 
     w=0.7,
     c1=1.5,
@@ -20,7 +21,8 @@ def run_pso(
 
     wind_bounds=(0, 1000),
     wave_bounds=(0, 1000),
-    battery_bounds=(0, 1e7),
+    geo_bounds=(0,17.6e3),      # in kW
+    battery_bounds=(0, 1e7),    # in Wh
     step_battery=100,
 
     random_seed=None,
@@ -32,14 +34,14 @@ def run_pso(
     # =========================
     # SEARCH SPACE
     # =========================
-    lower_bound = np.array([wind_bounds[0], wave_bounds[0], battery_bounds[0]])
-    upper_bound = np.array([wind_bounds[1], wave_bounds[1], battery_bounds[1]])
+    lower_bound = np.array([wind_bounds[0], wave_bounds[0], geo_bounds[0], battery_bounds[0]])
+    upper_bound = np.array([wind_bounds[1], wave_bounds[1], geo_bounds[1], battery_bounds[1]])
 
     # =========================
     # INITIALIZATION
     # =========================
-    positions = np.random.uniform(lower_bound, upper_bound, (num_particles, 3))
-    velocities = np.zeros((num_particles, 3))
+    positions = np.random.uniform(lower_bound, upper_bound, (num_particles, 4))
+    velocities = np.zeros((num_particles, 4))
 
     personal_best_positions = positions.copy()
     personal_best_scores = np.ones(num_particles) * 1e10
@@ -61,7 +63,8 @@ def run_pso(
 
             wind = int(round(x[0]))
             wave = int(round(x[1]))
-            battery = int(np.ceil(x[2] / step_battery)) * step_battery
+            geo = int(round(x[2]))
+            battery = int(np.ceil(x[3] / step_battery)) * step_battery
 
             # =========================
             # SYSTEM EVALUATION
@@ -69,9 +72,11 @@ def run_pso(
             results = simulate_energy_system(
                 wind_power=wind_power,
                 wave_power=wave_power,
+                geo_power=geo_power,
                 energy_demand=energy_demand,
                 num_wind=wind,
                 num_wave=wave,
+                geo_cap=geo,
                 batt_cap=battery,
                 init_soc=init_soc,
                 params=None
@@ -86,26 +91,27 @@ def run_pso(
             else:
                 score = LCOE
 
-            history.append((wind, wave, battery, LCOE, LPSP, SOC))
+            history.append((wind, wave, geo, battery, LCOE, LPSP, SOC))
 
             # =========================
             # PERSONAL BEST
             # =========================
             if score < personal_best_scores[i]:
                 personal_best_scores[i] = score
-                personal_best_positions[i] = np.array([wind, wave, battery])
+                personal_best_positions[i] = np.array([wind, wave, geo, battery])
 
             # =========================
             # GLOBAL BEST
             # =========================
             if score < global_best_score:
                 global_best_score = score
-                global_best_position = np.array([wind, wave, battery])
+                global_best_position = np.array([wind, wave, geo, battery])
 
         history_best.append((
             int(global_best_position[0]),
             int(global_best_position[1]),
             int(global_best_position[2]),
+            int(global_best_position[3]),
             global_best_score
         ))
 
@@ -114,8 +120,8 @@ def run_pso(
         # =========================
         for i in range(num_particles):
 
-            r1 = np.random.rand(3)
-            r2 = np.random.rand(3)
+            r1 = np.random.rand(4)
+            r2 = np.random.rand(4)
 
             velocities[i] = (
                 w * velocities[i]
@@ -134,15 +140,18 @@ def run_pso(
         int(global_best_position[0]),
         int(global_best_position[1]),
         int(global_best_position[2]),
+        int(global_best_position[3]),
     )
 
     results_best = simulate_energy_system(
         wind_power=wind_power,
         wave_power=wave_power,
+        geo_power=geo_power,
         energy_demand=energy_demand,
         num_wind=best_config[0],
         num_wave=best_config[1],
-        batt_cap=best_config[2],
+        geo_cap=best_config[2],
+        batt_cap=best_config[3],
         init_soc=init_soc,
         params=None
     )
@@ -153,7 +162,7 @@ def run_pso(
 
     df_history = pd.DataFrame(
         history,
-        columns=["Wind", "Wave", "Battery", "LCOE", "LPSP", "SOC"]
+        columns=["Wind", "Wave", "Geo", "Battery", "LCOE", "LPSP", "SOC"]
     )
 
     return {
