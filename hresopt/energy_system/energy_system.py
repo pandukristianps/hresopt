@@ -55,12 +55,15 @@ def simulate_energy_system(
 
     if wind_power is None:
         wind_power = np.zeros(T)
+        num_wind = 0
 
     if wave_power is None:
         wave_power = np.zeros(T)
+        num_wave = 0
 
     if geo_power is None:
         geo_power = np.zeros(T)
+        geo_cap = 0
 
     if energy_demand is None:
         raise ValueError("energy_demand cannot be None")
