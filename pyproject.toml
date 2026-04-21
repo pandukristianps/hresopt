@@ -35,6 +35,7 @@ classifiers = [
 plot = ["matplotlib"]
 
 [tool.setuptools.packages.find]
+where = ["."]
 include = ["hresopt*"]
 
 [project.urls]
