@@ -38,7 +38,6 @@ def compute_costs(params: SystemParams = None):
 def simulate_energy_system(
     wind_power=None,
     wave_power=None,
-    geo_power=None,
     energy_demand=None,
     num_wind=0,
     num_wave=0,
@@ -61,9 +60,7 @@ def simulate_energy_system(
         wave_power = np.zeros(T)
         num_wave = 0
 
-    if geo_power is None:
-        geo_power = np.zeros(T)
-        geo_cap = 0
+    geo_power = np.ones(T) * geo_cap
 
     if energy_demand is None:
         raise ValueError("energy_demand cannot be None")

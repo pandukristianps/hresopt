@@ -80,7 +80,6 @@ def run_pso(
             results = simulate_energy_system(
                 wind_power=wind_power,
                 wave_power=wave_power,
-                geo_power=geo_power,
                 energy_demand=energy_demand,
                 num_wind=wind,
                 num_wave=wave,
@@ -154,7 +153,6 @@ def run_pso(
     results_best = simulate_energy_system(
         wind_power=wind_power,
         wave_power=wave_power,
-        geo_power=geo_power,
         energy_demand=energy_demand,
         num_wind=best_config[0],
         num_wave=best_config[1],
