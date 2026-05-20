@@ -8,22 +8,22 @@ from hresopt.energy_system.energy_system import simulate_energy_system
 # =========================================================
 # CONFIG
 # =========================================================
-WIND_FILE = "data/wind.nc"
+WIND_FILE = "data/wind2025.nc"
 CURVE_FILE = "data/wind_curve.csv"
 
-WAVE_FILE = "data/wave.nc"
+WAVE_FILE = "data/wave2025.nc"
 MATRIX_FILE = "data/wave_matrix.csv"
 
-DEMAND_FILE = "data/demand_elhierro.csv"
+DEMAND_FILE = "data/elhierro2025.csv"
 
 LAT = 28
 LON = -18
 
-Z_HUB = 136
+Z_HUB = 137
 
-NUM_WIND = 17
-NUM_WAVE = 308
-BATT_CAP = 2126400
+NUM_WIND = 1
+NUM_WAVE = 23
+BATT_CAP = 0
 
 INIT_SOC = 0
 

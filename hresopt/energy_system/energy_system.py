@@ -125,7 +125,7 @@ def simulate_energy_system(
     SOC_final = SOC[-1]
 
     installed_capacity = float(num_wind * equip.P_rated_wind + num_wave * equip.P_rated_wave + geo_cap)
-    capacity_ratio = total_energy_generated/(installed_capacity * T + 1e-10)
+    capacity_factor = total_energy_generated/(installed_capacity * T + 1e-10)
     effective_capacity_factor = total_energy_met / (installed_capacity * T + 1e-10)
 
     curtailment = total_energy_generated - total_energy_met
@@ -138,7 +138,7 @@ def simulate_energy_system(
         "LPSP": LPSP,
         "SOC_final": SOC_final,
         "energy_met": total_energy_met,
-        "capacity_ratio" : capacity_ratio,
+        "capacity_factor" : capacity_factor,
         "effective_capacity_factor" : effective_capacity_factor,
         "curtailment_ratio" : curtailment_ratio
     }

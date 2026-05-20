@@ -19,17 +19,25 @@ def run_pso(
     LPSP_target=0.05,
     init_soc=0,
 
-    wind_bounds=(0, 1000),
-    wave_bounds=(0, 1000),
-    geo_bounds=(0, 17.6e3),
-    battery_bounds=(0, 1e7),
+    wind_max=None,
+    wave_max=None,
+    geo_max=None,
+    battery_max=None,
+    
+    step_geo=100,
     step_battery=100,
 
+    
     random_seed=None,
 ):
 
     if random_seed is not None:
         np.random.seed(random_seed)
+    
+    wind_bounds = (0, wind_max if wind_max is not None else 0)
+    wave_bounds = (0, wave_max if wave_max is not None else 0)
+    geo_bounds = (0, geo_max if geo_max is not None else 0)
+    battery_bounds = (0, battery_max if battery_max is not None else 0)
 
     # =========================
     # SEARCH SPACE
@@ -63,7 +71,7 @@ def run_pso(
 
             wind = int(round(x[0]))
             wave = int(round(x[1]))
-            geo = int(round(x[2]))
+            geo = int(np.ceil(x[2] / step_geo)) * step_geo
             battery = int(np.ceil(x[3] / step_battery)) * step_battery
 
             # =========================
