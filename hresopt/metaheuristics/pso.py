@@ -6,7 +6,6 @@ from hresopt.energy_system.energy_system import simulate_energy_system
 def run_pso(
     wind_power=None,
     wave_power=None,
-    geo_power=None,
     energy_demand=None,
 
     w=0.7,

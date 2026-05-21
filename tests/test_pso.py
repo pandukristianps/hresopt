@@ -18,15 +18,15 @@ CURVE_FILE = "data/wind_curve.csv"
 WAVE_FILE = "data/wave2025.nc"
 MATRIX_FILE = "data/wave_matrix.csv"
 
-DEMAND_FILE = "data/lapalma2025.csv"
+DEMAND_FILE = "data/elhierro2025.csv"
 
-LAT = 29
+LAT = 28
 LON = -18
 Z_HUB = 137
 
-N_RUNS = 50
+N_RUNS =15
 POPULATION_SIZE = 30
-NUM_ITER = 100
+NUM_ITER = 50
 LPSP_TARGET = 0.01
 
 
@@ -91,8 +91,8 @@ def test_pso():
             LPSP_target=LPSP_TARGET,
             random_seed=run,
             wind_max=100,
-            wave_max=400,
-            geo_max=17600,
+            wave_max=100,
+            geo_max=0,
             battery_max=1e6,
         )
 
