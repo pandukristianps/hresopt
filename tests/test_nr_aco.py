@@ -12,22 +12,22 @@ from hresopt.metaheuristics.nr_aco import run_nr_aco
 # =========================================================
 # CONFIG
 # =========================================================
-WIND_FILE = "data/wind.nc"
+WIND_FILE = "data/wind2025.nc"
 CURVE_FILE = "data/wind_curve.csv"
 
-WAVE_FILE = "data/wave.nc"
+WAVE_FILE = "data/wave2025.nc"
 MATRIX_FILE = "data/wave_matrix.csv"
 
-DEMAND_FILE = "data/demand_elhierro.csv"
+DEMAND_FILE = "data/elhierro2025.csv"
 
 LAT = 28
 LON = -18
-Z_HUB = 136
+Z_HUB = 137
 
 N_RUNS = 5
 NUM_ANTS = 10
 NUM_ITER = 20
-LPSP_TARGET = 0.05
+LPSP_TARGET = 0.01
 
 
 # =========================================================
@@ -89,6 +89,10 @@ def test_nr_aco():
             num_ants=NUM_ANTS,
             num_iterations=NUM_ITER,
             LPSP_target=LPSP_TARGET,
+            wind_max=1000,    
+            wave_max=None,    
+            geo_max=None,    
+            battery_max=1e6,
             random_seed=run
         )
 
@@ -120,7 +124,8 @@ def test_nr_aco():
     print("\n=== GLOBAL BEST SOLUTION ===")
     print(f"Wind: {best_config[0]}")
     print(f"Wave: {best_config[1]}")
-    print(f"Battery: {best_config[2]}")
+    print(f"Geo: {best_config[2]}")
+    print(f"Battery: {best_config[3]}")
     print(f"LCOE: {best_lcoe}")
     print(f"LPSP: {best_lpsp}")
 

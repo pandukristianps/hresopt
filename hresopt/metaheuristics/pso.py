@@ -23,7 +23,7 @@ def run_pso(
     geo_max=None,
     battery_max=None,
     
-    step_geo=100,
+    step_geo=50,
     step_battery=100,
 
     

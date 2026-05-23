@@ -24,9 +24,9 @@ LAT = 28
 LON = -18
 Z_HUB = 137
 
-N_RUNS =15
+N_RUNS =5
 POPULATION_SIZE = 30
-NUM_ITER = 50
+NUM_ITER = 10
 LPSP_TARGET = 0.01
 
 
@@ -91,7 +91,7 @@ def test_pso():
             LPSP_target=LPSP_TARGET,
             random_seed=run,
             wind_max=100,
-            wave_max=100,
+            wave_max=0,
             geo_max=0,
             battery_max=1e6,
         )
