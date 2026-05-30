@@ -32,15 +32,15 @@ def run_pso(
 
     if random_seed is not None:
         np.random.seed(random_seed)
-    
+
+    # =========================
+    # SEARCH SPACE
+    # =========================    
     wind_bounds = (0, wind_max if wind_max is not None else 0)
     wave_bounds = (0, wave_max if wave_max is not None else 0)
     geo_bounds = (0, geo_max if geo_max is not None else 0)
     battery_bounds = (0, battery_max if battery_max is not None else 0)
 
-    # =========================
-    # SEARCH SPACE
-    # =========================
     lower_bound = np.array([wind_bounds[0], wave_bounds[0], geo_bounds[0], battery_bounds[0]])
     upper_bound = np.array([wind_bounds[1], wave_bounds[1], geo_bounds[1], battery_bounds[1]])
 

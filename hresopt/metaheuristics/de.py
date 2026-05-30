@@ -4,9 +4,9 @@ from hresopt.energy_system.energy_system import simulate_energy_system
 
 
 def run_de(
-    wind_power,
-    wave_power,
-    energy_demand,
+    wind_power=None,
+    wave_power=None,
+    energy_demand=None,
 
     F=0.8,
     CR=0.9,
@@ -17,9 +17,12 @@ def run_de(
     LPSP_target=0.05,
     init_soc=0,
 
-    wind_bounds=(0, 1000),
-    wave_bounds=(0, 1000),
-    battery_bounds=(0, 1e7),
+    wind_max=None,
+    wave_max=None,
+    geo_max=None,
+    battery_max=None,
+    
+    step_geo=100,
     step_battery=100,
 
     random_seed=None,
@@ -31,13 +34,19 @@ def run_de(
     # =========================
     # SEARCH SPACE
     # =========================
-    lower_bound = np.array([wind_bounds[0], wave_bounds[0], battery_bounds[0]])
-    upper_bound = np.array([wind_bounds[1], wave_bounds[1], battery_bounds[1]])
+
+    wind_bounds = (0, wind_max if wind_max is not None else 0)
+    wave_bounds = (0, wave_max if wave_max is not None else 0)
+    geo_bounds = (0, geo_max if geo_max is not None else 0)
+    battery_bounds = (0, battery_max if battery_max is not None else 0)
+
+    lower_bound = np.array([wind_bounds[0], wave_bounds[0], geo_bounds[0], battery_bounds[0]])
+    upper_bound = np.array([wind_bounds[1], wave_bounds[1], geo_bounds[1], battery_bounds[1]])
 
     # =========================
     # INITIALIZATION
     # =========================
-    population = np.random.uniform(lower_bound, upper_bound, (population_size, 3))
+    population = np.random.uniform(lower_bound, upper_bound, (population_size, 4))
     scores = np.ones(population_size) * 1e10
 
     LCOEs = np.zeros(population_size)
@@ -51,7 +60,7 @@ def run_de(
     history_best = []
 
     # =========================
-    # INITIAL EVALUATION
+    # FIRST LOOP
     # =========================
     for i in range(population_size):
 
@@ -59,7 +68,8 @@ def run_de(
 
         wind = int(round(x[0]))
         wave = int(round(x[1]))
-        battery = int(np.ceil(x[2] / step_battery)) * step_battery
+        geo = int(np.ceil(x[2] / step_geo)) * step_geo
+        battery = int(np.ceil(x[3] / step_battery)) * step_battery
 
         results = simulate_energy_system(
             wind_power=wind_power,
@@ -67,6 +77,7 @@ def run_de(
             energy_demand=energy_demand,
             num_wind=wind,
             num_wave=wave,
+            geo_cap=geo,
             batt_cap=battery,
             init_soc=init_soc,
             params=None
@@ -85,11 +96,11 @@ def run_de(
         LCOEs[i] = LCOE
         LPSPs[i] = LPSP
         SOCs[i]  = SOC
-        history.append((wind, wave, battery, LCOE, LPSP, SOC))
+        history.append((wind, wave, geo, battery, LCOE, LPSP, SOC))
 
         if score < best_score:
             best_score = score
-            best_solution = [wind, wave, battery]
+            best_solution = [wind, wave, geo, battery]
 
     history_best.append((*best_solution, best_score))
 
@@ -114,15 +125,16 @@ def run_de(
             # =========================
             # CROSSOVER
             # =========================
-            cross_points = np.random.rand(3) < CR
+            cross_points = np.random.rand(4) < CR
             if not np.any(cross_points):
-                cross_points[np.random.randint(0, 3)] = True
+                cross_points[np.random.randint(0, 4)] = True
 
             trial = np.where(cross_points, mutant, population[i])
 
             wind = int(round(trial[0]))
             wave = int(round(trial[1]))
-            battery = int(np.ceil(trial[2] / step_battery)) * step_battery
+            geo = int(np.ceil(trial[2] / step_geo)) * step_geo
+            battery = int(np.ceil(trial[3] / step_battery)) * step_battery
 
             # =========================
             # SYSTEM EVALUATION
@@ -133,6 +145,7 @@ def run_de(
                 energy_demand=energy_demand,
                 num_wind=wind,
                 num_wave=wave,
+                geo_cap=geo,
                 batt_cap=battery,
                 init_soc=init_soc,
                 params=None
@@ -158,17 +171,19 @@ def run_de(
                 LPSPs[i] = LPSP
                 SOCs[i]  = SOC
 
-                history.append((wind, wave, battery, LCOE, LPSP, SOC))
+                history.append((wind, wave, geo, battery, LCOE, LPSP, SOC))
 
             else:
                 old = population[i]
                 wind_old = int(round(old[0]))
                 wave_old = int(round(old[1]))
-                battery_old = int(np.ceil(old[2] / step_battery)) * step_battery
+                geo_old = int(np.ceil(old[2] / step_geo)) * step_geo
+                battery_old = int(np.ceil(old[3] / step_battery)) * step_battery
 
                 history.append((
                     wind_old,
                     wave_old,
+                    geo_old,
                     battery_old,
                     LCOEs[i],
                     LPSPs[i],
@@ -186,7 +201,8 @@ def run_de(
             best_solution = [
                 int(round(population[min_idx][0])),
                 int(round(population[min_idx][1])),
-                int(np.ceil(population[min_idx][2] / step_battery)) * step_battery
+                int(np.ceil(population[min_idx][2] / step_geo)) * step_geo,
+                int(np.ceil(population[min_idx][3] / step_battery)) * step_battery
             ]
 
         history_best.append((*best_solution, best_score))
@@ -200,7 +216,8 @@ def run_de(
         energy_demand=energy_demand,
         num_wind=best_solution[0],
         num_wave=best_solution[1],
-        batt_cap=best_solution[2],
+        geo_cap=best_solution[2],
+        batt_cap=best_solution[3],
         init_soc=init_soc,
         params=None
     )
@@ -211,7 +228,7 @@ def run_de(
 
     df_history = pd.DataFrame(
         history,
-        columns=["Wind", "Wave", "Battery", "LCOE", "LPSP", "SOC"]
+        columns=["Wind", "Wave", "Geo", "Battery", "LCOE", "LPSP", "SOC"]
     )
 
     return {
